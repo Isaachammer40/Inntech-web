@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inntech</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos globales */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f2ef;
+            color: #333;
+        }
+
+        header {
+            background-color: #004182;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav a {
+            padding: 14px 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s, background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #f0f0f0;
+            color: #004182;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-input {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #004182;
+            background-color: #ffffff;
+        }
+
+        .form-button {
+            padding: 12px 20px;
+            background-color: #004182;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .form-button:hover {
+            background-color: #003061;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #004182;
+            color: white;
+        }
+
+        canvas {
+            max-width: 600px;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Inntech</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="showTab('inicio')">Inicio</a>
+        <a href="#" onclick="showTab('formulario')">Formulario</a>
+        <a href="#" onclick="showTab('resultados')">Resultados</a>
+        <a href="#" onclick="showTab('base_datos')">Base de Datos</a>
+    </nav>
+
+    <div id="inicio" class="content tab-content active">
+        <h2>Bienvenido a Inntech</h2>
+        <p>Analiza y compara las brechas salariales en diferentes empresas. Empieza ingresando tus datos a continuación:</p>
+        <form class="login-form">
+            <input type="email" id="email" class="form-input" placeholder="Correo electrónico">
+            <input type="password" id="password" class="form-input" placeholder="Contraseña">
+            <button type="button" class="form-button" onclick="login()">Iniciar Sesión</button>
+        </form>
+        <p id="login-error" style="color: red; display: none;">Credenciales incorrectas. Inténtalo de nuevo.</p>
+    </div>
+
+    <div id="formulario" class="content tab-content">
+        <h2>Formulario de Ingreso</h2>
+        <form id="empresaForm">
+            <label for="empresa">Empresa:</label><br>
+            <input type="text" id="empresa" class="form-input"><br>
+            <label for="puesto">Puesto de Trabajo:</label><br>
+            <input type="text" id="puesto" class="form-input"><br>
+            <label for="salario">Rango Salarial:</label><br>
+            <input type="number" id="salario" class="form-input"><br>
+            <label for="genero">Género:</label><br>
+            <select id="genero" class="form-input">
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+            </select><br>
+            <button type="submit" class="form-button">Enviar</button>
+        </form>
+    </div>
+
+    <div id="resultados" class="content tab-content">
+        <h2>Resultados de Análisis</h2>
+        <canvas id="brechaSalarialChart"></canvas>
+        <table>
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Brecha Salarial</th>
+                </tr>
+            </thead>
+            <tbody id="tablaResultados"></tbody>
+        </table>
+    </div>
+
+    <div id="base_datos" class="content tab-content">
+        <h2>Base de Datos de Empresas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre de la Empresa</th>
+                    <th>Certificación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Empresa A</td>
+                    <td>Certificada</td>
+                </tr>
+                <tr>
+                    <td>Empresa B</td>
+                    <td>No Certificada</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email === "admin@example.com" && password === "1234") {
+                showTab('formulario');
+                document.getElementById('login-error').style.display = 'none';
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function generarResultados() {
+            const data = [
+                { empresa: 'TechCorp', brecha: 10 },
+                { empresa: 'InnovaLtd', brecha: 15 },
+                { empresa: 'SoftSolutions', brecha: 5 },
+            ];
+
+            const tbody = document.getElementById('tablaResultados');
+            tbody.innerHTML = "";
+            data.forEach(item => {
+                tbody.innerHTML += `<tr><td>${item.empresa}</td><td>${item.brecha}%</td></tr>`;
+            });
+
+            const ctx = document.getElementById('brechaSalarialChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.empresa),
+                    datasets: [{
+                        label: 'Brecha Salarial (%)',
+                        data: data.map(d => d.brecha),
+                        backgroundColor: '#004182'
+                    }]
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', generarResultados);
+    </script>
+</body>
+</html>
